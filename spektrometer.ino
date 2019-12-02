@@ -1,5 +1,6 @@
 #include "stepper.h"
 #include "qdec.h"
+#include "progressmeter.h"
  
 // Zasedene pinjole:
 //     motor: 3 A1 7 6 13 10
@@ -20,7 +21,9 @@ void go_to(float pos) {
       Serial.print(" ...");
       stepper.setDestination(pos);
       String input = "";
+      BarIndicator indicator(stepper.getPosition(), pos);
       while (!stepper.partialMove()) {
+          indicator.print(stepper.getPosition());
           while (Serial.available()) {
               char c = Serial.read();
               if (c == '\n') {
@@ -41,6 +44,7 @@ void go_to(float pos) {
               input += c;
           }
       }
+      indicator.print(stepper.getPosition(), true);
       Serial.println(" arrived.");
   } else {
       Serial.print("Position ");
