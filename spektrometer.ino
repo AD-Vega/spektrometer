@@ -18,7 +18,29 @@ void go_to(float pos) {
       Serial.print(" to ");
       Serial.print(pos);
       Serial.print(" ...");
-      stepper.setPosition(pos);
+      stepper.setDestination(pos);
+      String input = "";
+      while (!stepper.partialMove()) {
+          while (Serial.available()) {
+              char c = Serial.read();
+              if (c == '\n') {
+                  while (Serial.available()) {
+                      Serial.read();
+                  }
+                  if (input.startsWith("stop")) {
+                      stepper.setDestination(stepper.getPosition());
+                      Serial.print(" interrupted at ");
+                      Serial.print(stepper.getPosition());
+                      Serial.println(".");
+                      return;
+                  } else {
+                      input = "";
+                      break;
+                  }
+              }
+              input += c;
+          }
+      }
       Serial.println(" arrived.");
   } else {
       Serial.print("Position ");

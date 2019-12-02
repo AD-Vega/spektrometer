@@ -24,4 +24,6 @@ estep <s>:  Change quadrature encoder step factor to <s>.
             Can be in the interval (0, 50], default 8.
             Each quadrature encoder step translates to
             (<s> * stepper motor steps).
+
+stop:       Only works while moving to position, aborts the move.
 ```
