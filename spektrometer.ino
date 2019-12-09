@@ -1,6 +1,7 @@
 #include "stepper.h"
 #include "qdec.h"
 #include "progressmeter.h"
+#include "linereader.h"
  
 // Zasedene pinjole:
 //     motor: 3 A1 7 6 13 10
@@ -8,6 +9,7 @@
 //     enkoder: 2 4
 
 Stepper stepper;
+LineReader lineReader;
 
 using enc = ::SimpleHacks::QDec<4, 2, true>;
 static int encoderStep = 8;
@@ -20,28 +22,15 @@ void go_to(float pos) {
       Serial.print(pos);
       Serial.print(" ...");
       stepper.setDestination(pos);
-      String input = "";
       BarIndicator indicator(stepper.getPosition(), pos);
       while (!stepper.partialMove()) {
           indicator.print(stepper.getPosition());
-          while (Serial.available()) {
-              char c = Serial.read();
-              if (c == '\n') {
-                  while (Serial.available()) {
-                      Serial.read();
-                  }
-                  if (input.startsWith("stop")) {
-                      stepper.setDestination(stepper.getPosition());
-                      Serial.print(" interrupted at ");
-                      Serial.print(stepper.getPosition());
-                      Serial.println(".");
-                      return;
-                  } else {
-                      input = "";
-                      break;
-                  }
-              }
-              input += c;
+          if (lineReader.lineReady() && lineReader.line().startsWith("stop")) {
+              stepper.setDestination(stepper.getPosition());
+              Serial.print(" interrupted at ");
+              Serial.print(stepper.getPosition());
+              Serial.println(".");
+              return;
           }
       }
       indicator.print(stepper.getPosition(), true);
@@ -151,9 +140,7 @@ void loop()
         Serial.println(stepper.getPosition());
     }
 
-    if (Serial.available()) {
-      const String input = Serial.readStringUntil('\n');
-      execute(input);
-    }
+    while (!lineReader.lineReady()) { /* empty */ }
+    execute(lineReader.line());
   }
  
