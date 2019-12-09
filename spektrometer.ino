@@ -71,10 +71,16 @@ void set_encoder_step(int estep) {
   }
 }
 
+void set_home_position() {
+  Serial.print("Moving to home position ...");
+  stepper.setHomePosition();
+  Serial.println(" arrived to home position.");
+}
+
 // execute command
 void execute(const String& input) {
   if (input == "home" || input == "h") {
-    stepper.setHomePosition();
+    set_home_position();
   }
   else if (input == "red" || input == "r") {
     go_to(2500);
@@ -126,9 +132,7 @@ void setup()
     enc::begin();
     Serial.begin(9600);
     delay(500);
-    Serial.print("Moving to home position ...");
-    stepper.setHomePosition();
-    Serial.println(" arrived to home position.");
+    set_home_position();
 }
 
 void loop() 
