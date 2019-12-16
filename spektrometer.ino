@@ -126,21 +126,21 @@ void setup()
 
 void loop() 
 {
-    ::SimpleHacks::QDECODER_EVENT event = enc::update();
-
-    int step = 0;
-    if (event & ::SimpleHacks::QDECODER_EVENT_CW) {
-        step = encoderStep;
-    } else if (event & ::SimpleHacks::QDECODER_EVENT_CCW) {
-        step = -encoderStep;
+    while (!lineReader.lineReady()) {
+      ::SimpleHacks::QDECODER_EVENT event = enc::update();
+  
+      int step = 0;
+      if (event & ::SimpleHacks::QDECODER_EVENT_CW) {
+          step = encoderStep;
+      } else if (event & ::SimpleHacks::QDECODER_EVENT_CCW) {
+          step = -encoderStep;
+      }
+  
+      if (step) {
+          stepper.setPosition(stepper.getPosition() + step);
+          Serial.println(stepper.getPosition());
+      }
     }
-
-    if (step) {
-        stepper.setPosition(stepper.getPosition() + step);
-        Serial.println(stepper.getPosition());
-    }
-
-    while (!lineReader.lineReady()) { /* empty */ }
     execute(lineReader.line());
   }
  
